@@ -326,7 +326,6 @@ def sync_do_tts(text: str, interrupt: bool = True):
 
 def sync_play_motion(name: str = "reset", speed: str = "normal", **kwargs):
     t = int(time.time() * 1000)
-    kwargs.pop("speed", None)
     kwargs["speed"] = speed
     start_play_motion(name=name, timestamp=t, **kwargs)
     # 题述中该函数给出“简略实现”，此处保持同等语义并返回 True。
@@ -361,7 +360,8 @@ class UKitController:
         self.udp_sock.sendto(msg.encode(), addr)
 
 
-ukit_controller = UKitController
+class ukit_controller(UKitController):
+    """兼容旧命名的控制器类别名。"""
 
 
 __all__ = [

@@ -14,9 +14,16 @@ except ImportError:
     # 避免导入错误，同时不影响核心逻辑的测试。
     import types
 
+    def _noop_init(ip):
+        return None
+
+    def _noop_sync_play_motion(motion_name, speed="normal", **kwargs):
+        # 保留 **kwargs 用于兼容真实 YanAPI.sync_play_motion 的扩展参数签名。
+        return None
+
     YanAPI = types.SimpleNamespace(
-        init=lambda ip: None,
-        sync_play_motion=lambda motion_name, speed="normal", **kwargs: None,
+        init=_noop_init,
+        sync_play_motion=_noop_sync_play_motion,
     )
 
 
