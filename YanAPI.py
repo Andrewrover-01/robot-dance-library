@@ -16,8 +16,6 @@ from __future__ import annotations
 import asyncio
 import json
 import time
-from enum import Enum, unique
-from multiprocessing import Process
 from socket import AF_INET, SOCK_DGRAM, SO_BROADCAST, SOL_SOCKET, socket
 from typing import Dict, List, Optional
 
@@ -29,12 +27,6 @@ try:
     nest_asyncio.apply()
 except ImportError:
     nest_asyncio = None
-
-try:
-    import cv2  # noqa: F401
-except ImportError:
-    cv2 = None
-
 
 # --- 全局配置与基础请求 ---
 basic_url = "http://127.0.0.1:9090/v1/"
@@ -318,16 +310,18 @@ async def __wait_common(
 
 
 def sync_do_tts(text: str, interrupt: bool = True):
-    t = int(time.time())
-    start_voice_tts(text, interrupt, t)
+    timestamp = int(time.time())
+    start_voice_tts(text, interrupt, timestamp)
     loop = asyncio.get_event_loop()
-    return loop.run_until_complete(loop.create_task(__wait_common(t, get_voice_tts_state, (t,))))
+    return loop.run_until_complete(
+        loop.create_task(__wait_common(timestamp, get_voice_tts_state, (timestamp,)))
+    )
 
 
 def sync_play_motion(name: str = "reset", speed: str = "normal", **kwargs):
-    t = int(time.time() * 1000)
+    timestamp_ms = int(time.time() * 1000)
     kwargs["speed"] = speed
-    start_play_motion(name=name, timestamp=t, **kwargs)
+    start_play_motion(name=name, timestamp=timestamp_ms, **kwargs)
     # 题述中该函数给出“简略实现”，此处保持同等语义并返回 True。
     return True
 
