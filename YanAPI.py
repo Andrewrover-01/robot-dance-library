@@ -91,11 +91,16 @@ def _req(method: str, path: str, data=None, params=None, is_json: bool = True):
             if is_json
             else response.content
         )
-    except Exception as exc:  # noqa: BLE001
+    except (
+        requests.RequestException,
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+        ValueError,
+    ) as exc:
         return {"code": -1, "msg": str(exc)}
 
 
-def __resIsSuccess(res) -> bool:
+def _res_is_success(res) -> bool:
     return isinstance(res, dict) and res.get("code") == 0
 
 
@@ -225,12 +230,12 @@ def get_sensors_gyro():
     return _req("GET", "sensors/gyro")
 
 
-def get_sensors_ultrasonic(id=None, slot=None):
-    return _req("GET", "sensors/ultrasonic", params={"id": id, "slot": slot})
+def get_sensors_ultrasonic(sensor_id=None, slot=None):
+    return _req("GET", "sensors/ultrasonic", params={"id": sensor_id, "slot": slot})
 
 
-def get_sensors_touch(id=None, slot=None):
-    return _req("GET", "sensors/touch", params={"id": id, "slot": slot})
+def get_sensors_touch(sensor_id=None, slot=None):
+    return _req("GET", "sensors/touch", params={"id": sensor_id, "slot": slot})
 
 
 # --- 6. 视觉功能 (Visions) ---
@@ -250,9 +255,9 @@ def take_vision_photo(res: str = "640x480"):
     return _req("POST", "visions/photos", {"resolution": res})
 
 
-def start_qr_recognition(enableStream: bool = False):
+def start_qr_recognition(enable_stream: bool = False):
     return _req(
-        "PUT", "visions/QR", {"operation": "start", "remote_stream_enable": enableStream}
+        "PUT", "visions/QR", {"operation": "start", "remote_stream_enable": enable_stream}
     )
 
 
@@ -274,14 +279,14 @@ def start_voice_iat(ts: int = 0):
 # --- 补充：状态获取函数 ---
 def get_voice_tts_state(ts: Optional[int] = None):
     res = _req("GET", "voice/tts", params={"timestamp": ts} if ts else None)
-    if __resIsSuccess(res) and isinstance(res.get("data"), str):
+    if _res_is_success(res) and isinstance(res.get("data"), str):
         res["data"] = json.loads(res["data"].strip("\x00"))
     return res
 
 
 def get_voice_asr_state():
     res = _req("GET", "voice/asr")
-    if __resIsSuccess(res) and isinstance(res.get("data"), str):
+    if _res_is_success(res) and isinstance(res.get("data"), str):
         res["data"] = json.loads(res["data"].strip("\x00"))
     return res
 
@@ -307,8 +312,7 @@ def sync_do_tts(text: str, interrupt: bool = True):
 
 def sync_play_motion(name: str = "reset", speed: str = "normal", **kwargs):
     t = int(time.time() * 1000)
-    if "speed" not in kwargs:
-        kwargs["speed"] = speed
+    kwargs["speed"] = speed
     start_play_motion(name=name, timestamp=t, **kwargs)
     # 题述中该函数给出“简略实现”，此处保持同等语义并返回 True。
     return True
