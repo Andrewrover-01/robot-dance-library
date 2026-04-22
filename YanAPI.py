@@ -18,7 +18,7 @@ import json
 import time
 from enum import Enum, unique
 from multiprocessing import Process
-from socket import AF_INET, SOCK_DGRAM, SOL_BROADCAST, SOL_SOCKET, socket
+from socket import AF_INET, SOCK_DGRAM, SO_BROADCAST, SOL_SOCKET, socket
 from typing import Dict, List, Optional
 
 import requests
