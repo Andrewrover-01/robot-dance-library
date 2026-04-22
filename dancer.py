@@ -16,7 +16,7 @@ except ImportError:
 
     YanAPI = types.SimpleNamespace(
         init=lambda ip: None,
-        sync_play_motion=lambda motion_name, speed="normal": None,
+        sync_play_motion=lambda motion_name, speed="normal", **kwargs: None,
     )
 
 

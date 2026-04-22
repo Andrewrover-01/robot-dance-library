@@ -292,7 +292,21 @@ def get_voice_asr_state():
 
 
 # --- 8. 同步等待逻辑 (Sync Helpers) ---
-async def __wait_common(ts, get_func, args=(), target_status="idle"):
+async def __wait_common(
+    ts: int,
+    get_func,
+    args: tuple = (),
+    target_status: str = "idle",
+):
+    """轮询等待指定状态。
+
+    Args:
+        ts (int): 目标时间戳。
+        get_func: 状态查询函数。
+        args (tuple): 查询函数参数。
+        target_status (str): 目标状态，默认 ``idle``。
+    """
+
     while True:
         res = get_func(*args)
         data = res.get("data", {}) if isinstance(res, dict) else {}
@@ -312,6 +326,7 @@ def sync_do_tts(text: str, interrupt: bool = True):
 
 def sync_play_motion(name: str = "reset", speed: str = "normal", **kwargs):
     t = int(time.time() * 1000)
+    kwargs.pop("speed", None)
     kwargs["speed"] = speed
     start_play_motion(name=name, timestamp=t, **kwargs)
     # 题述中该函数给出“简略实现”，此处保持同等语义并返回 True。
@@ -335,7 +350,7 @@ class RobotVisualTaskResult:
 
 
 # --- 10. uKit2.0 控制类 ---
-class ukit_controller:
+class UKitController:
     def __init__(self, port: int = 25880):
         self.port = port
         self.udp_sock = socket(AF_INET, SOCK_DGRAM)
@@ -344,6 +359,9 @@ class ukit_controller:
     def send_msg(self, msg: str) -> None:
         addr = ("255.255.255.255", self.port)
         self.udp_sock.sendto(msg.encode(), addr)
+
+
+ukit_controller = UKitController
 
 
 __all__ = [
@@ -384,5 +402,6 @@ __all__ = [
     "get_voice_asr_state",
     "RobotBatteryInfo",
     "RobotVisualTaskResult",
+    "UKitController",
     "ukit_controller",
 ]
