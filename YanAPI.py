@@ -305,8 +305,10 @@ def sync_do_tts(text: str, interrupt: bool = True):
     return loop.run_until_complete(loop.create_task(__wait_common(t, get_voice_tts_state, (t,))))
 
 
-def sync_play_motion(name: str = "reset", **kwargs):
+def sync_play_motion(name: str = "reset", speed: str = "normal", **kwargs):
     t = int(time.time() * 1000)
+    if "speed" not in kwargs:
+        kwargs["speed"] = speed
     start_play_motion(name=name, timestamp=t, **kwargs)
     # 题述中该函数给出“简略实现”，此处保持同等语义并返回 True。
     return True
